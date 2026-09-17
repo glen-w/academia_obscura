@@ -1,0 +1,18 @@
+# build
+dist/
+.astro/
+
+# deps
+node_modules/
+
+# env — never commit an Umami ID by accident
+.env
+.env.*
+!.env.example
+
+# os
+.DS_Store
+
+# unpublished drafts — stay on this machine, never GitHub
+src/content/blog/*.md
+public/posts/

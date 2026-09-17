@@ -1,0 +1,30 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+const published = (await getCollection('blog')).filter((p) => p.data.draft !== true);
+---
+
+<Base
+  title="Blog"
+  description="The Academia Obscura writing archive is returning later. Nothing is posted yet."
+  path="/blog/"
+>
+  <div class="wrap">
+    <div class="empty-blog">
+      <h1>Blog</h1>
+      <p class="tagline">Silly, not stupid.</p>
+      <p>Nothing posted yet. The writing archive is returning later.</p>
+      <div class="ctas">
+        <a class="btn primary" href="/book/">The Book</a>
+        <a class="btn ghost" href="/lectures/">Lectures</a>
+      </div>
+      {published.length > 0 && (
+        <p class="quiet">
+          Unexpected published posts: {published.length}. This page should stay empty until a
+          future release.
+        </p>
+      )}
+    </div>
+  </div>
+</Base>

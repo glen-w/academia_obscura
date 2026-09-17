@@ -1,0 +1,69 @@
+---
+import Base from '../layouts/Base.astro';
+
+const talks = [
+  {
+    date: '2016-05-17',
+    when: '17 May 2016',
+    where: 'Malmö',
+    title: 'Academia Obscura lecture',
+  },
+  {
+    date: '2017-02-13',
+    when: '13 February 2017',
+    where: 'Dublin',
+    title: 'Academia Obscura lecture',
+  },
+  {
+    date: '2017-12-01',
+    when: 'December 2017',
+    where: 'IDDRI, Paris',
+    title: 'Academia Obscura talk',
+  },
+  {
+    date: '2018-11-09',
+    when: '9 November 2018',
+    where: 'IEEE Sweden / KTH EECS, Kista',
+    title: 'The hidden silly side of higher education',
+    href: 'https://r8.ieee.org/sweden/event/academia-obscura-the-hidden-silly-side-of-higher-education/',
+  },
+];
+---
+
+<Base
+  title="Lectures"
+  description="Academia Obscura lectures — a cabinet of academic curiosities, not your average seminar."
+  path="/lectures/"
+>
+  <div class="wrap">
+    <h1>Lectures</h1>
+    <p>
+      An Academia Obscura lecture is not your average lecture. Think a cabinet of academic
+      curiosities: the lighter, and darker, side of scholarly life, with slides.
+    </p>
+    <p>Past talks include:</p>
+    <ul class="talks">
+      {
+        talks.map((t) => (
+          <li>
+            <time datetime={t.date}>{t.when}</time>
+            <strong>{t.title}</strong>
+            <div>
+              {t.where}
+              {t.href && (
+                <>
+                  {' '}
+                  · <a href={t.href}>event note</a>
+                </>
+              )}
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+    <p>
+      Enquiries:
+      <a href="mailto:glen@academiaobscura.com">glen@academiaobscura.com</a>
+    </p>
+  </div>
+</Base>

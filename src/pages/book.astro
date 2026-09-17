@@ -1,0 +1,33 @@
+---
+import Base from '../layouts/Base.astro';
+import cover from '../assets/book-cover.jpg';
+---
+
+<Base
+  title="The Book"
+  description="Academia Obscura: The Hidden Silly Side of Higher Education, published with Unbound."
+  path="/book/"
+>
+  <div class="wrap">
+    <h1>The Book</h1>
+    <div class="book-split">
+      <img src={cover.src} alt="Cover of Academia Obscura: The Hidden Silly Side of Higher Education" />
+      <div>
+        <p>
+          <em>Academia Obscura: The Hidden Silly Side of Higher Education</em> collects the stranger
+          corners of scholarly life — baffling studies, accidental humour, and rituals that only make
+          sense from inside a university.
+        </p>
+        <p>
+          It was crowdfunded with Unbound by oddball academics around the world, and published in
+          late 2017 / 2018. “Write a book,” they said. “It’ll be fun,” they said. It mostly was.
+        </p>
+        <p>
+          <a class="btn primary" href="https://www.amazon.com/Academia-Obscura-Hidden-Higher-Education/dp/1783523417"
+            >Find the book</a
+          >
+        </p>
+      </div>
+    </div>
+  </div>
+</Base>

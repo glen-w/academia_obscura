@@ -1,0 +1,56 @@
+---
+import Base from '../layouts/Base.astro';
+import crest from '../assets/crest.png';
+import cat from '../assets/cat.gif';
+---
+
+<Base
+  title="Academia Obscura"
+  description="The lighter side of academia. Silly, not stupid."
+  path="/"
+>
+  <div class="wrap">
+    <section class="hero">
+      <img class="crest" src={crest.src} alt="Academia Obscura crest: a cat in academic dress" />
+      <h1>Academia Obscura</h1>
+      <p class="tagline">Silly, not stupid.</p>
+      <p class="lede">
+        A cabinet of academic curiosities: odd papers, obscure rituals, and the moments where
+        higher education gently collapses under its own weight. Born as a blog in 2014, later a
+        book, still a love letter to curiosity taken too far.
+      </p>
+      <div class="ctas">
+        <a class="btn primary" href="/book/">The Book</a>
+        <a class="btn ghost" href="/lectures/">Lectures</a>
+      </div>
+    </section>
+
+    <h2>As seen in</h2>
+    <ul class="press">
+      <li>
+        <a href="https://www.theguardian.com/global/series/grooves-of-academe">The Guardian</a>
+      </li>
+      <li>
+        <a href="https://www.timeshighereducation.com/author/glen-wright">Times Higher Education</a>
+      </li>
+      <li>
+        <a
+          href="https://www.chronicle.com/blogs/wiredcampus/meet-the-26-year-old-behind-academic-twitters-most-popular-hashtags"
+          >The Chronicle</a
+        >
+      </li>
+    </ul>
+
+    <article class="card">
+      <img src={cat.src} width="72" height="72" alt="" />
+      <h3>Academics with Cats</h3>
+      <p>
+        The annual awards that briefly made academic Twitter a cattery. Returning with the writing
+        archive — not a live contest today.
+      </p>
+    </article>
+
+    <p class="quiet">Writing archive returning later.</p>
+    <p class="quiet">The mailing list is not open yet.</p>
+  </div>
+</Base>

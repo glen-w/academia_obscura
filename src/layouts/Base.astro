@@ -1,0 +1,103 @@
+---
+import '../styles/global.css';
+import '@fontsource/source-serif-4/400.css';
+import '@fontsource/source-serif-4/600.css';
+import '@fontsource/source-serif-4/400-italic.css';
+import '@fontsource/source-sans-3/400.css';
+import '@fontsource/source-sans-3/600.css';
+import crest from '../assets/crest.png';
+
+interface Props {
+  title?: string;
+  description?: string;
+  path?: string;
+}
+
+const {
+  title = 'Academia Obscura',
+  description = 'The lighter side of academia. Silly, not stupid.',
+  path = Astro.url.pathname,
+} = Astro.props;
+
+const canonical = new URL(path, Astro.site).href;
+const ogImage = new URL('/og.jpg', Astro.site).href;
+const umamiId =
+  (import.meta.env.PUBLIC_UMAMI_WEBSITE_ID as string | undefined) ||
+  'e6dcdfa9-29d3-4727-ab4c-fc756f85801b';
+const umamiSrc =
+  (import.meta.env.PUBLIC_UMAMI_SRC as string | undefined) ||
+  'https://analytics.glenwright.earth/script.js';
+const glenwrightId = '591578b7-7945-4429-88b4-c1ea8bf39f9e';
+const umamiOk = Boolean(umamiId && umamiId !== glenwrightId);
+
+const nav = [
+  { href: '/', label: 'Home' },
+  { href: '/book/', label: 'Book' },
+  { href: '/lectures/', label: 'Lectures' },
+  { href: '/blog/', label: 'Blog' },
+  { href: '/contact/', label: 'Contact' },
+];
+
+function current(href: string) {
+  if (href === '/') return path === '/' || path === '';
+  return path === href || path.startsWith(href);
+}
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title === 'Academia Obscura' ? title : `${title} · Academia Obscura`}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    {umamiOk && <script defer src={umamiSrc} data-website-id={umamiId} />}
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="chrome">
+      <div class="chrome-inner">
+        <a class="wordmark" href="/">
+          <img src={crest.src} width="36" height="36" alt="" />
+          Academia Obscura
+        </a>
+        <nav aria-label="Primary">
+          <ul>
+            {
+              nav.map((item) => (
+                <li>
+                  <a href={item.href} aria-current={current(item.href) ? 'page' : undefined}>
+                    {item.label}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
+      </div>
+    </header>
+    <main id="main">
+      <slot />
+    </main>
+    <footer class="site">
+      <div class="foot-inner">
+        <p>
+          <a href="/contact/">Contact</a>
+          ·
+          <a href="https://glenwright.earth/">Glen Wright</a>
+        </p>
+        <p>academiaobscura.com · since 2014</p>
+      </div>
+    </footer>
+  </body>
+</html>
