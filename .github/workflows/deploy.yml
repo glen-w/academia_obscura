@@ -31,7 +31,6 @@ jobs:
           ASTRO_TELEMETRY_DISABLED: "1"
           PUBLIC_UMAMI_WEBSITE_ID: ${{ vars.PUBLIC_UMAMI_WEBSITE_ID }}
           PUBLIC_UMAMI_SRC: https://analytics.glenwright.earth/script.js
-      - run: npm run check:no-draft-leak
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

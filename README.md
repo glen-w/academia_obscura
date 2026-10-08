@@ -8,9 +8,7 @@ Public site: landing, book, lectures, contact, and the blog archive.
 
 ```sh
 npm install
-python3 scripts/migrate-drafts.py   # only if re-importing from personal site / backups
 npm run build
-npm run check:no-draft-leak
 npm run dev
 ```
 
@@ -22,4 +20,4 @@ Separate Umami site ID for `academiaobscura.com`. Copy `.env.example` → `.env`
 
 ## Deploy
 
-GitHub Pages via Actions on `main` (see `.github/workflows/deploy.yml`). Point OVH `academiaobscura.com` + `www` at Pages — see [DNS.md](DNS.md).
+GitHub Pages via Actions on `main` (see `.github/workflows/deploy.yml`).

@@ -13,5 +13,10 @@ node_modules/
 # os
 .DS_Store
 
+# local ops / machine-only notes
+DNS.md
+MIGRATION.md
+scripts/
+
 # keep directory; post markdown and images are tracked for the public archive
 !src/content/blog/.gitkeep
