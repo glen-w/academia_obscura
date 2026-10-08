@@ -8,6 +8,7 @@ export const GET: APIRoute = async () => {
     .map(
       (p) => `    <item>
       <title><![CDATA[${p.data.title}]]></title>
+      <link>https://academiaobscura.com/blog/${p.id}/</link>
       <pubDate>${p.data.date.toUTCString()}</pubDate>
       <guid>https://academiaobscura.com/blog/${p.id}/</guid>
     </item>`,

@@ -1,8 +1,14 @@
 import type { APIRoute } from 'astro';
+import { getCollection } from 'astro:content';
 
-const paths = ['/', '/book/', '/lectures/', '/blog/', '/contact/'];
+const staticPaths = ['/', '/book/', '/lectures/', '/blog/', '/contact/'];
 
-export const GET: APIRoute = () => {
+export const GET: APIRoute = async () => {
+  const posts = (await getCollection('blog')).filter((p) => p.data.draft !== true);
+  const paths = [
+    ...staticPaths,
+    ...posts.map((p) => `/blog/${p.id}/`),
+  ];
   const urls = paths
     .map(
       (p) => `  <url>

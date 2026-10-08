@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Copy Academia Obscura posts into this repo as unpublished drafts."""
+"""Copy Academia Obscura posts from the personal site (+ WXR/SQL gaps) into this repo."""
 
 from __future__ import annotations
 
+import argparse
 import html
 import json
 import re
@@ -23,10 +24,14 @@ SQL = (
     AO_LIB
     / "content/Academia Obscura website backups 2014-2018/2020-07/cl23-a-wordp-xfp.sql"
 )
-UPLOADS = (
+# Prefer nested full-site backup uploads when present
+_UPLOAD_CANDIDATES = [
     AO_LIB
-    / "content/Academia Obscura website backups 2014-2018/2020-07/public_html/wp-content/uploads"
-)
+    / "content/Academia Obscura website backups 2014-2018/2020-07/2020-07-25-site-full_backup-academiaobscura.com/public_html/wp-content/uploads",
+    AO_LIB
+    / "content/Academia Obscura website backups 2014-2018/2020-07/public_html/wp-content/uploads",
+]
+UPLOADS = next((p for p in _UPLOAD_CANDIDATES if p.exists()), _UPLOAD_CANDIDATES[-1])
 
 BLOG = ROOT / "src/content/blog"
 PUBLIC_POSTS = ROOT / "public/posts"
@@ -58,7 +63,8 @@ def parse_fm(raw: str) -> tuple[dict, str]:
     fm_raw, body = parts[1], parts[2]
     data: dict = {}
     for key in ("title", "date", "description", "layout"):
-        m = re.search(rf"^{key}:\s*(.*)$", fm_raw, re.M)
+        # Don't let \s eat the newline or an empty `description:` steals the next line.
+        m = re.search(rf"^{key}:[ \t]*(.*)$", fm_raw, re.M)
         if not m:
             continue
         val = m.group(1).strip()
@@ -69,9 +75,11 @@ def parse_fm(raw: str) -> tuple[dict, str]:
                 val = val[1:-1]
         elif val.startswith("'") and val.endswith("'"):
             val = val[1:-1]
+        if key == "description" and (not val or val.startswith("tags:")):
+            val = ""
         data[key] = val
     for key in ("tags", "categories"):
-        m = re.search(rf"^{key}:\s*(\[[\s\S]*?\])", fm_raw, re.M)
+        m = re.search(rf"^{key}:[ \t]*(\[[\s\S]*?\])", fm_raw, re.M)
         if m:
             blob = re.sub(r"\s+", " ", m.group(1))
             try:
@@ -133,6 +141,7 @@ def write_post(
     source: str,
     original_slug: str,
     description: str = "",
+    draft: bool = False,
 ) -> Path:
     date_prefix = date[:10]
     fname = f"{date_prefix}-{original_slug}.md"
@@ -143,15 +152,21 @@ def write_post(
         n += 1
     tags = [t for t in tags if t]
     categories = [c for c in categories if c]
+    desc = description or ""
+    if desc.startswith("tags:"):
+        desc = ""
+    # Keep truly empty stubs unpublished; everything else goes live.
+    if not body.strip():
+        draft = True
     fm = "\n".join(
         [
             "---",
             f"title: {yaml_quote(title)}",
             f"date: {date_prefix}",
-            f"description: {yaml_quote(description or '')}",
+            f"description: {yaml_quote(desc)}",
             f"tags: {json.dumps(tags, ensure_ascii=False)}",
             f"categories: {json.dumps(categories, ensure_ascii=False)}",
-            "draft: true",
+            f"draft: {'true' if draft else 'false'}",
             f"source: {source}",
             f"originalSlug: {yaml_quote(original_slug)}",
             "---",
@@ -170,13 +185,14 @@ def cdata(block: str, tag: str) -> str:
     return m.group(1).strip() if m else ""
 
 
-def parse_wxr(path: Path) -> list[dict]:
+def parse_wxr(path: Path, *, published_only: bool = True) -> list[dict]:
     xml = path.read_text(encoding="utf-8", errors="replace")
     out = []
     for block in re.findall(r"<item>(.*?)</item>", xml, re.S):
         if cdata(block, "wp:post_type") != "post":
             continue
-        if cdata(block, "wp:status") != "publish":
+        status = cdata(block, "wp:status")
+        if published_only and status != "publish":
             continue
         title = html.unescape(cdata(block, "title"))
         slug = cdata(block, "wp:post_name") or slugify(title)
@@ -196,6 +212,7 @@ def parse_wxr(path: Path) -> list[dict]:
                 "content": content,
                 "tags": tags,
                 "categories": cats,
+                "status": status,
             }
         )
     return out
@@ -314,6 +331,15 @@ def rewrite_wp_images(html_body: str, copied: set[str], missing: list[str]) -> s
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--drafts",
+        action="store_true",
+        help="Import everything as draft: true (legacy behaviour)",
+    )
+    args = parser.parse_args()
+    as_draft = bool(args.drafts)
+
     for old in BLOG.glob("*.md"):
         old.unlink()
 
@@ -323,8 +349,12 @@ def main() -> None:
     personal_titles: set[str] = set()
     personal_slugs: set[str] = set()
     imported_personal = []
+    filled_from_wxr = []
 
-    wxr_posts = parse_wxr(WXR) if WXR.exists() else []
+    wxr_posts = parse_wxr(WXR, published_only=True) if WXR.exists() else []
+    wxr_all = parse_wxr(WXR, published_only=False) if WXR.exists() else []
+    wxr_by_title = {norm_title(p["title"]): p for p in wxr_all}
+    wxr_by_slug = {p["slug"]: p for p in wxr_all}
     wxr_title_keys = {norm_title(p["title"]) for p in wxr_posts}
     wxr_slugs = {p["slug"] for p in wxr_posts}
 
@@ -344,16 +374,27 @@ def main() -> None:
         if not is_ao:
             continue
         date = str(fm.get("date") or path.name[:10])[:10]
-        body = rewrite_images(body, copied, missing_imgs)
+        source = "glenwright"
+        if not body.strip():
+            wp = wxr_by_slug.get(slug) or wxr_by_title.get(norm_title(title))
+            if wp and (wp.get("content") or "").strip():
+                body = rewrite_wp_images(wp["content"], copied, missing_imgs)
+                source = "glenwright+wxr"
+                filled_from_wxr.append(title)
+            else:
+                body = ""
+        else:
+            body = rewrite_images(body, copied, missing_imgs)
         write_post(
             date=date,
             title=title,
             body=body,
             tags=tags,
             categories=cats,
-            source="glenwright",
+            source=source,
             original_slug=slug,
             description=str(fm.get("description") or "").strip(),
+            draft=as_draft,
         )
         personal_files.append(path)
         personal_titles.add(title.strip().lower())
@@ -379,6 +420,7 @@ def main() -> None:
             categories=p["categories"],
             source="wxr",
             original_slug=p["slug"],
+            draft=as_draft,
         )
         wxr_gap.append(p)
         personal_titles.add(key)
@@ -413,6 +455,7 @@ def main() -> None:
                 categories=[],
                 source="sql",
                 original_slug=p["slug"],
+                draft=as_draft,
             )
             sql_gap.append(p)
             personal_titles.add(key)
@@ -423,28 +466,36 @@ def main() -> None:
         "\n".join(str(p) for p in personal_files) + "\n", encoding="utf-8"
     )
 
-    draft_count = len(list(BLOG.glob("*.md")))
+    all_posts = list(BLOG.glob("*.md"))
+    published = sum(1 for p in all_posts if re.search(r"^draft:\s*false\s*$", p.read_text(), re.M))
+    drafts = len(all_posts) - published
     lines = [
-        "# Academia Obscura draft migration",
+        "# Academia Obscura blog migration",
         "",
         f"- Personal-site AO posts imported: **{len(imported_personal)}**",
+        f"- Empty personal bodies filled from WXR: **{len(filled_from_wxr)}**",
         f"- WXR published posts (2018-12): **{len(wxr_posts)}**",
-        f"- WXR-only drafts added: **{len(wxr_gap)}**",
-        f"- SQL-only drafts after 2018-12: **{len(sql_gap)}**"
+        f"- WXR-only posts added: **{len(wxr_gap)}**",
+        f"- SQL-only posts after 2018-12: **{len(sql_gap)}**"
         + (f" (parse note: {sql_error})" if sql_error else ""),
-        f"- Total draft files: **{draft_count}**",
+        f"- Total post files: **{len(all_posts)}** (published: **{published}**, draft: **{drafts}**)",
         f"- Images copied to `public/posts/`: **{len(copied)}**",
         f"- Missing image names: **{len(set(missing_imgs))}**",
         "",
-        "All imported posts have `draft: true`. They are not in the public sitemap, RSS, or blog index.",
+        "Empty-bodied stubs stay `draft: true` and are omitted from the public index/RSS/sitemap.",
         "",
         "## Personal-site files to delete",
         "",
         "Listed in `scripts/personal-posts-to-delete.txt`.",
         "",
-        "## WXR-only titles",
+        "## Filled from WXR",
         "",
     ]
+    if filled_from_wxr:
+        lines += [f"- {t}" for t in filled_from_wxr]
+    else:
+        lines.append("- (none)")
+    lines += ["", "## WXR-only titles", ""]
     if wxr_gap:
         lines += [f"- {p['date']} — {p['title']}" for p in wxr_gap]
     else:

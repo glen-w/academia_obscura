@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /**
  * Fail the build if any draft post slug/title leaks into dist/.
  */
@@ -26,8 +25,9 @@ function parseFrontmatter(raw) {
   const fm = m[1];
   const title = fm.match(/^title:\s*["']?(.+?)["']?\s*$/m)?.[1];
   const slug = fm.match(/^originalSlug:\s*["']?(.+?)["']?\s*$/m)?.[1];
+  const idFromFile = null;
   const draft = /draft:\s*true/.test(fm);
-  return { title, slug, draft };
+  return { title, slug, draft, idFromFile };
 }
 
 if (!existsSync(dist)) {
@@ -35,10 +35,16 @@ if (!existsSync(dist)) {
   process.exit(1);
 }
 
-const drafts = walk(blogDir)
+const posts = walk(blogDir)
   .filter((f) => f.endsWith('.md'))
-  .map((f) => parseFrontmatter(readFileSync(f, 'utf8')))
-  .filter((p) => p.draft);
+  .map((f) => {
+    const meta = parseFrontmatter(readFileSync(f, 'utf8'));
+    const base = f.split('/').pop().replace(/\.md$/, '');
+    return { ...meta, id: base };
+  });
+
+const drafts = posts.filter((p) => p.draft);
+const published = posts.filter((p) => !p.draft);
 
 const distFiles = walk(dist).filter((f) =>
   ['.html', '.xml', '.txt', '.js', '.json'].includes(extname(f)),
@@ -47,15 +53,17 @@ const haystack = distFiles.map((f) => readFileSync(f, 'utf8')).join('\n');
 
 const leaks = [];
 for (const d of drafts) {
+  if (d.id && haystack.includes(`/blog/${d.id}`)) {
+    leaks.push(`draft path /blog/${d.id}`);
+  }
   if (d.slug && haystack.includes(`/blog/${d.slug}`)) {
-    leaks.push(`slug path /blog/${d.slug}`);
+    leaks.push(`draft slug path /blog/${d.slug}`);
   }
 }
 
 const blogHtml = join(dist, 'blog/index.html');
 if (existsSync(blogHtml)) {
   const html = readFileSync(blogHtml, 'utf8');
-  if (html.includes('Unexpected published posts')) leaks.push('blog index reports published posts');
   for (const d of drafts) {
     if (d.title && html.includes(d.title) && d.title.length > 12) {
       leaks.push(`draft title on blog index: ${d.title}`);
@@ -63,11 +71,8 @@ if (existsSync(blogHtml)) {
   }
 }
 
-const sitemap = existsSync(join(dist, 'sitemap.xml'))
-  ? readFileSync(join(dist, 'sitemap.xml'), 'utf8')
-  : '';
-if (sitemap.includes('/blog/') && (sitemap.match(/<loc>/g) || []).length > 6) {
-  leaks.push('sitemap has unexpected extra URLs');
+if (published.length === 0) {
+  leaks.push('expected published posts, found none');
 }
 
 if (leaks.length) {
@@ -76,5 +81,5 @@ if (leaks.length) {
 }
 
 console.log(
-  `Draft leak check OK (${drafts.length} drafts, ${distFiles.length} dist files, 0 leaks)`,
+  `Draft leak check OK (${published.length} published, ${drafts.length} drafts, ${distFiles.length} dist files, 0 leaks)`,
 );

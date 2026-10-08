@@ -2,17 +2,19 @@
 
 The lighter side of academia. Silly, not stupid.
 
-Public site: **landing + empty blog**. Old posts live in `src/content/blog/` as `draft: true` **on this machine only** (gitignored; not on GitHub).
+Public site: landing, book, lectures, contact, and the blog archive.
 
 ## Local
 
 ```sh
 npm install
-python3 scripts/migrate-drafts.py   # only if re-importing
+python3 scripts/migrate-drafts.py   # only if re-importing from personal site / backups
 npm run build
 npm run check:no-draft-leak
 npm run dev
 ```
+
+Empty-bodied stubs stay `draft: true` and are omitted from the index, RSS, and sitemap.
 
 ## Analytics
 
@@ -20,6 +22,4 @@ Separate Umami site ID for `academiaobscura.com`. Copy `.env.example` → `.env`
 
 ## Deploy
 
-GitHub Pages from the `gh-pages` branch (Actions deploy is ready in `.github/workflows/deploy.yml` but needs a `workflow` token scope to push). After `npm run build`, publish `dist/` to `gh-pages`.
-
-Point OVH `academiaobscura.com` + `www` at Pages after the first green deploy — see [DNS.md](DNS.md).
+GitHub Pages via Actions on `main` (see `.github/workflows/deploy.yml`). Point OVH `academiaobscura.com` + `www` at Pages — see [DNS.md](DNS.md).

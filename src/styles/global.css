@@ -134,8 +134,24 @@ nav a:hover {
 }
 
 .hero {
+  margin-bottom: 0.5rem;
+}
+
+.hero-banner {
+  width: 100%;
+  overflow: hidden;
+  border-bottom: 1px solid var(--ao-rule);
+}
+
+.hero-banner img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.hero-body {
   text-align: center;
-  padding: 3rem 0 2.25rem;
+  padding: 2.25rem 1.25rem 2.25rem;
 }
 
 .hero .crest {
@@ -313,6 +329,98 @@ footer.site a {
   padding: 3rem 0 1rem;
 }
 
+.blog-header {
+  margin-bottom: 2rem;
+}
+
+.blog-lede {
+  margin: 0;
+  max-width: 36rem;
+}
+
+.post-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.post-list li {
+  display: grid;
+  grid-template-columns: 7.5rem 1fr;
+  gap: 0.75rem 1.25rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--ao-rule);
+  align-items: baseline;
+}
+
+.post-list time {
+  color: var(--ao-meta);
+  font-size: 0.88rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.post-list a {
+  color: var(--ao-ink);
+  text-decoration: none;
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 1.12rem;
+  line-height: 1.35;
+}
+
+.post-list a:hover {
+  color: var(--ao-accent);
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.post-header {
+  margin-bottom: 1.75rem;
+}
+
+.post-meta {
+  margin: 0 0 0.5rem;
+  color: var(--ao-meta);
+  font-size: 0.92rem;
+}
+
+.post-body {
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.post-body :global(h2),
+.post-body :global(h3) {
+  font-family: 'Source Serif 4', Georgia, serif;
+  color: var(--ao-accent);
+  margin-top: 2rem;
+}
+
+.post-body :global(p) {
+  margin: 0 0 1.1rem;
+}
+
+.post-body :global(blockquote) {
+  margin: 1.25rem 0;
+  padding: 0.15rem 0 0.15rem 1rem;
+  border-left: 3px solid var(--ao-accent);
+  color: var(--ao-meta);
+}
+
+.post-body :global(img) {
+  display: block;
+  margin: 1.25rem auto;
+}
+
+.post-body :global(iframe) {
+  max-width: 100%;
+}
+
+.post-back {
+  margin-top: 2.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--ao-rule);
+}
+
 @media (max-width: 640px) {
   .chrome-inner {
     flex-direction: column;
@@ -332,6 +440,11 @@ footer.site a {
 
   .btn {
     text-align: center;
+  }
+
+  .post-list li {
+    grid-template-columns: 1fr;
+    gap: 0.2rem;
   }
 }
 

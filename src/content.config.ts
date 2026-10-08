@@ -9,8 +9,8 @@ const blog = defineCollection({
     description: z.string().optional().default(''),
     tags: z.array(z.string()).default([]),
     categories: z.array(z.string()).default([]),
-    draft: z.literal(true),
-    source: z.enum(['glenwright', 'wxr', 'sql']).optional(),
+    draft: z.boolean().default(false),
+    source: z.enum(['glenwright', 'glenwright+wxr', 'wxr', 'sql']).optional(),
     originalSlug: z.string().optional(),
   }),
 });

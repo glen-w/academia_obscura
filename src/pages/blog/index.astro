@@ -2,29 +2,51 @@
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 
-const published = (await getCollection('blog')).filter((p) => p.data.draft !== true);
+const posts = (await getCollection('blog'))
+  .filter((p) => p.data.draft !== true)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+function hrefFor(post: (typeof posts)[number]) {
+  return `/blog/${post.id}/`;
+}
+
+function formatDate(d: Date) {
+  return d.toLocaleDateString('en-GB', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+}
 ---
 
 <Base
   title="Blog"
-  description="The Academia Obscura writing archive is returning later. Nothing is posted yet."
+  description="The Academia Obscura writing archive — odd papers, obscure rituals, and academic curiosities."
   path="/blog/"
 >
   <div class="wrap">
-    <div class="empty-blog">
+    <header class="blog-header">
       <h1>Blog</h1>
       <p class="tagline">Silly, not stupid.</p>
-      <p>Nothing posted yet. The writing archive is returning later.</p>
-      <div class="ctas">
-        <a class="btn primary" href="/book/">The Book</a>
-        <a class="btn ghost" href="/lectures/">Lectures</a>
-      </div>
-      {published.length > 0 && (
-        <p class="quiet">
-          Unexpected published posts: {published.length}. This page should stay empty until a
-          future release.
-        </p>
-      )}
-    </div>
+      <p class="lede blog-lede">
+        The writing archive from 2014 onwards. Odd papers, obscure rituals, and the lighter side of
+        higher education.
+      </p>
+    </header>
+
+    {
+      posts.length === 0 ? (
+        <p class="quiet">Nothing posted yet.</p>
+      ) : (
+        <ol class="post-list">
+          {posts.map((post) => (
+            <li>
+              <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
+              <a href={hrefFor(post)}>{post.data.title}</a>
+            </li>
+          ))}
+        </ol>
+      )
+    }
   </div>
 </Base>

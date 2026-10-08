@@ -13,6 +13,5 @@ node_modules/
 # os
 .DS_Store
 
-# unpublished drafts — stay on this machine, never GitHub
-src/content/blog/*.md
-public/posts/
+# keep directory; post markdown and images are tracked for the public archive
+!src/content/blog/.gitkeep

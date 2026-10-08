@@ -1,7 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import crest from '../assets/crest.png';
-import cat from '../assets/cat.gif';
+import heroBanner from '../assets/hero-banner.jpg';
 ---
 
 <Base
@@ -9,8 +9,17 @@ import cat from '../assets/cat.gif';
   description="The lighter side of academia. Silly, not stupid."
   path="/"
 >
-  <div class="wrap">
-    <section class="hero">
+  <section class="hero">
+    <div class="hero-banner">
+      <img
+        src={heroBanner.src}
+        width={heroBanner.width}
+        height={heroBanner.height}
+        alt="Academia Obscura on a weathered table beside a cup of coffee"
+        fetchpriority="high"
+      />
+    </div>
+    <div class="wrap hero-body">
       <img class="crest" src={crest.src} alt="Academia Obscura crest: a cat in academic dress" />
       <h1>Academia Obscura</h1>
       <p class="tagline">Silly, not stupid.</p>
@@ -20,11 +29,14 @@ import cat from '../assets/cat.gif';
         book, still a love letter to curiosity taken too far.
       </p>
       <div class="ctas">
-        <a class="btn primary" href="/book/">The Book</a>
+        <a class="btn primary" href="/blog/">Blog</a>
+        <a class="btn ghost" href="/book/">The Book</a>
         <a class="btn ghost" href="/lectures/">Lectures</a>
       </div>
-    </section>
+    </div>
+  </section>
 
+  <div class="wrap">
     <h2>As seen in</h2>
     <ul class="press">
       <li>
@@ -40,17 +52,5 @@ import cat from '../assets/cat.gif';
         >
       </li>
     </ul>
-
-    <article class="card">
-      <img src={cat.src} width="72" height="72" alt="" />
-      <h3>Academics with Cats</h3>
-      <p>
-        The annual awards that briefly made academic Twitter a cattery. Returning with the writing
-        archive — not a live contest today.
-      </p>
-    </article>
-
-    <p class="quiet">Writing archive returning later.</p>
-    <p class="quiet">The mailing list is not open yet.</p>
   </div>
 </Base>
