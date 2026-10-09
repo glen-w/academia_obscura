@@ -1,0 +1,37 @@
+---
+import Base from '../../layouts/Base.astro';
+
+const formats = [
+  { label: 'EPUB', href: '/ebook/academia-obscura.epub', hint: 'Most e-readers' },
+  { label: 'MOBI', href: '/ebook/academia-obscura.mobi', hint: 'Kindle' },
+  { label: 'PDF', href: '/ebook/academia-obscura.pdf', hint: 'Print layout' },
+];
+---
+
+<Base
+  title="Download the book"
+  description="Free EPUB, MOBI, and PDF downloads of Academia Obscura."
+  path="/book/download/"
+>
+  <div class="wrap">
+    <h1>Download the Academia Obscura book for free!</h1>
+    <p class="quiet">
+      The publisher went bankrupt (I swear it wasn't my fault) so I assume that this is fine.
+    </p>
+    <ul class="download-formats">
+      {
+        formats.map((format) => (
+          <li>
+            <a class="btn primary" href={format.href} download>
+              {format.label}
+            </a>
+            <span class="download-hint">{format.hint}</span>
+          </li>
+        ))
+      }
+    </ul>
+    <p>
+      <a href="/book/">← Back to the book page</a>
+    </p>
+  </div>
+</Base>

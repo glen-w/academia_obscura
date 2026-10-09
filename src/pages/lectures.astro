@@ -2,7 +2,12 @@
 import Base from '../layouts/Base.astro';
 
 const lecturePhoto = '/lectures/academia-obscura-pub-lecture.jpg';
-const lectureSlides = '/lectures/academia-obscura-lecture-slides.pdf';
+const slideCount = 56;
+const slides = Array.from(
+  { length: slideCount },
+  (_, i) => `/lectures/slides/slide-${String(i + 1).padStart(2, '0')}.jpg`,
+);
+const slidesJson = JSON.stringify(slides);
 ---
 
 <Base
@@ -13,8 +18,9 @@ const lectureSlides = '/lectures/academia-obscura-lecture-slides.pdf';
   <div class="wrap wide">
     <h1>Lectures</h1>
     <p>
-      An Academia Obscura lecture is not your average lecture. Think a cabinet of academic
-      curiosities: the lighter, and darker, side of scholarly life, with slides.
+      An Academia Obscura lecture is not your average lecture. Over the course of a highly amusing
+      hour, Glen Wright takes you on a tour through a cabinet of academic curiosities: the lighter,
+      and darker, side of scholarly life — the hidden silly side of higher education, with slides.
     </p>
 
     <div class="lecture-showcase">
@@ -28,18 +34,33 @@ const lectureSlides = '/lectures/academia-obscura-lecture-slides.pdf';
         />
       </figure>
 
-      <div class="lecture-pdf">
-        <iframe
-          src={`${lectureSlides}#view=FitH`}
-          title="Academia Obscura lecture slides (PDF)"
-        ></iframe>
-        <p class="quiet pdf-fallback">
-          <a href={lectureSlides} target="_blank" rel="noopener noreferrer">
-            Open or download the slides (PDF)
-          </a>
-          — use your browser’s PDF controls to move between pages.
-        </p>
-      </div>
+      <section
+        class="slide-carousel"
+        aria-label="Lecture slides"
+        data-slides={slidesJson}
+        tabindex="0"
+      >
+        <div class="slide-stage">
+          <button type="button" class="slide-nav" data-slide-prev aria-label="Previous slide">
+            ‹
+          </button>
+          <figure class="slide-frame">
+            <img
+              data-slide-img
+              src={slides[0]}
+              width={1440}
+              height={1080}
+              alt={`Lecture slide 1 of ${slideCount}`}
+              decoding="async"
+              fetchpriority="high"
+            />
+          </figure>
+          <button type="button" class="slide-nav" data-slide-next aria-label="Next slide">
+            ›
+          </button>
+        </div>
+        <p class="slide-status" data-slide-status aria-live="polite">1 / {slideCount}</p>
+      </section>
     </div>
 
     <p>
@@ -48,3 +69,99 @@ const lectureSlides = '/lectures/academia-obscura-lecture-slides.pdf';
     </p>
   </div>
 </Base>
+
+<script>
+  const root = document.querySelector<HTMLElement>('.slide-carousel');
+  if (root) {
+    const slides: string[] = JSON.parse(root.dataset.slides || '[]');
+    const img = root.querySelector<HTMLImageElement>('[data-slide-img]');
+    const status = root.querySelector<HTMLElement>('[data-slide-status]');
+    const prevBtn = root.querySelector<HTMLButtonElement>('[data-slide-prev]');
+    const nextBtn = root.querySelector<HTMLButtonElement>('[data-slide-next]');
+
+    const INITIAL_PRELOAD = 3;
+    const loaded = new Set<number>();
+    let index = 0;
+
+    function preload(i: number) {
+      if (i < 0 || i >= slides.length || loaded.has(i)) return;
+      loaded.add(i);
+      const probe = new Image();
+      probe.decoding = 'async';
+      probe.src = slides[i];
+    }
+
+    function preloadNeighbors() {
+      preload(index + 1);
+      preload(index - 1);
+    }
+
+    function preloadRemainingInBackground(from: number) {
+      let cursor = from;
+      const step = (deadline?: IdleDeadline) => {
+        while (cursor < slides.length) {
+          if (deadline && deadline.timeRemaining() <= 0) {
+            requestIdleCallback(step);
+            return;
+          }
+          preload(cursor);
+          cursor += 1;
+        }
+      };
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(step);
+      } else {
+        window.setTimeout(() => step(), 200);
+      }
+    }
+
+    // Slide 0 is already requested by the visible <img>.
+    loaded.add(0);
+    for (let i = 1; i < Math.min(INITIAL_PRELOAD, slides.length); i++) {
+      preload(i);
+    }
+
+    function render() {
+      if (!slides.length || !img) return;
+      index = ((index % slides.length) + slides.length) % slides.length;
+      preload(index);
+      img.src = slides[index];
+      img.alt = `Lecture slide ${index + 1} of ${slides.length}`;
+      if (status) status.textContent = `${index + 1} / ${slides.length}`;
+      if (prevBtn) prevBtn.disabled = slides.length < 2;
+      if (nextBtn) nextBtn.disabled = slides.length < 2;
+      preloadNeighbors();
+    }
+
+    prevBtn?.addEventListener('click', () => {
+      index -= 1;
+      render();
+    });
+
+    nextBtn?.addEventListener('click', () => {
+      index += 1;
+      render();
+    });
+
+    root.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowLeft') {
+        index -= 1;
+        render();
+      } else if (event.key === 'ArrowRight') {
+        index += 1;
+        render();
+      }
+    });
+
+    render();
+
+    if (slides.length > INITIAL_PRELOAD) {
+      const startBackground = () => preloadRemainingInBackground(INITIAL_PRELOAD);
+      if (document.readyState === 'complete') {
+        startBackground();
+      } else {
+        window.addEventListener('load', startBackground, { once: true });
+      }
+    }
+  }
+</script>
