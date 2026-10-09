@@ -1,7 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
-import crest from '../assets/crest.png';
-import heroBanner from '../assets/hero-banner.jpg';
+import bookHero from '../assets/book-hero.png';
 ---
 
 <Base
@@ -9,30 +8,16 @@ import heroBanner from '../assets/hero-banner.jpg';
   description="The lighter side of academia. Silly, not stupid."
   path="/"
 >
-  <section class="hero">
-    <div class="hero-banner">
+  <section class="hero hero-home">
+    <h1 class="hero-home-title">Academia Obscura</h1>
+    <div class="hero-book">
       <img
-        src={heroBanner.src}
-        width={heroBanner.width}
-        height={heroBanner.height}
-        alt="Academia Obscura on a weathered table beside a cup of coffee"
+        src={bookHero.src}
+        width={bookHero.width}
+        height={bookHero.height}
+        alt="Academia Obscura: The Hidden Silly Side of Higher Education"
         fetchpriority="high"
       />
-    </div>
-    <div class="wrap hero-body">
-      <img class="crest" src={crest.src} alt="Academia Obscura crest: a cat in academic dress" />
-      <h1>Academia Obscura</h1>
-      <p class="tagline">Silly, not stupid.</p>
-      <p class="lede">
-        A cabinet of academic curiosities: odd papers, obscure rituals, and the moments where
-        higher education gently collapses under its own weight. Born as a blog in 2014, later a
-        book, still a love letter to curiosity taken too far.
-      </p>
-      <div class="ctas">
-        <a class="btn primary" href="/blog/">Blog</a>
-        <a class="btn ghost" href="/book/">The Book</a>
-        <a class="btn ghost" href="/lectures/">Lectures</a>
-      </div>
     </div>
   </section>
 

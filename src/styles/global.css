@@ -137,41 +137,32 @@ nav a:hover {
   margin-bottom: 0.5rem;
 }
 
-.hero-banner {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  overflow: hidden;
-  border-bottom: 1px solid var(--ao-rule);
-  background: var(--ao-canvas);
-}
-
-.hero-banner img {
-  display: block;
-  width: 100%;
-  max-width: 36rem;
-  height: auto;
-}
-
-.hero-body {
+.hero-home {
+  padding: 2.5rem 1.25rem 1rem;
   text-align: center;
-  padding: 2.25rem 1.25rem 2.25rem;
 }
 
-.hero .crest {
-  width: 6.5rem;
-  height: auto;
-  margin: 0 auto 1.1rem;
+.hero-home-title {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.hero-book {
+  display: inline-block;
+  max-width: min(100%, 14rem);
+}
+
+.hero-book img {
   display: block;
-}
-
-.hero h1 {
-  font-family: 'Source Serif 4', Georgia, serif;
-  font-weight: 600;
-  font-size: clamp(2.1rem, 5vw, 3.1rem);
-  line-height: 1.15;
-  margin: 0 0 0.35rem;
-  color: var(--ao-accent);
+  width: 100%;
+  height: auto;
 }
 
 .tagline {
@@ -293,21 +284,36 @@ h1 {
   box-shadow: 0 8px 24px rgb(0 0 0 / 12%);
 }
 
-.talks {
-  list-style: none;
+.lecture-showcase {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin: 2rem 0;
+  align-items: start;
+}
+
+.lecture-photo {
   margin: 0;
-  padding: 0;
 }
 
-.talks li {
-  padding: 0.85rem 0;
-  border-bottom: 1px solid var(--ao-rule);
-}
-
-.talks time {
+.lecture-showcase img {
+  width: 100%;
+  height: auto;
   display: block;
-  color: var(--ao-meta);
-  font-size: 0.85rem;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 12%);
+}
+
+.lecture-pdf iframe {
+  display: block;
+  width: 100%;
+  height: min(70vh, 32rem);
+  border: 1px solid var(--ao-rule);
+  background: var(--ao-paper);
+}
+
+.pdf-fallback {
+  margin: 0.65rem 0 0;
+  font-size: 0.88rem;
 }
 
 footer.site {
@@ -437,6 +443,10 @@ footer.site a {
   .book-split {
     grid-template-columns: 1fr;
     max-width: 8rem;
+  }
+
+  .lecture-showcase {
+    grid-template-columns: 1fr;
   }
 
   .ctas {
