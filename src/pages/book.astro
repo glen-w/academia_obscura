@@ -1,6 +1,47 @@
 ---
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import Base from '../layouts/Base.astro';
 import cover from '../assets/book-cover.jpg';
+import { parseCsv } from '../lib/parseCsv';
+
+type Review = {
+  stars: number;
+  name: string;
+  text: string;
+  source: string;
+};
+
+function clip(text: string, limit = 320) {
+  const flat = text.replace(/\s+/g, ' ').trim();
+  if (flat.length <= limit) return flat;
+  const cut = flat.slice(0, limit).replace(/\s+\S*$/, '');
+  return `${cut.replace(/[.,;:]+$/, '')}…`;
+}
+
+const csvPath = fileURLToPath(new URL('../../data/book-reviews.csv', import.meta.url));
+const seen = new Set<string>();
+const reviews: Review[] = [];
+
+for (const row of parseCsv(readFileSync(csvPath, 'utf8'))) {
+  const starRaw = row.stars?.trim();
+  const text = row.text?.trim();
+  if (!starRaw || !text) continue;
+  const stars = Number(starRaw);
+  if (![1, 2, 4, 5].includes(stars)) continue;
+  const name = row.name?.trim() || 'Anonymous';
+  const key = `${stars}|${name.toLowerCase()}|${text.slice(0, 80).toLowerCase()}`;
+  if (seen.has(key)) continue;
+  seen.add(key);
+  reviews.push({
+    stars,
+    name,
+    text: clip(text),
+    source: row.source?.trim() || '',
+  });
+}
+
+const reviewsJson = JSON.stringify(reviews);
 ---
 
 <Base
@@ -35,5 +76,143 @@ import cover from '../assets/book-cover.jpg';
         </p>
       </div>
     </div>
+
+    <section class="review-carousel" aria-label="Reader reviews" data-reviews={reviewsJson}>
+      <div class="review-controls">
+        <div class="review-toggle" role="group" aria-label="Review tone">
+          <span class="review-toggle-label" data-side="good">Good</span>
+          <button
+            type="button"
+            class="review-switch"
+            role="switch"
+            aria-checked="false"
+            aria-label="Show bad reviews"
+            data-review-switch
+          >
+            <span class="review-switch-knob" aria-hidden="true"></span>
+          </button>
+          <span class="review-toggle-label" data-side="bad">Bad</span>
+        </div>
+        <label class="review-ugly">
+          <input type="checkbox" data-review-ugly />
+          Ugly
+        </label>
+      </div>
+
+      <div class="review-stage">
+        <button type="button" class="review-nav" data-review-prev aria-label="Previous review">
+          ‹
+        </button>
+        <figure class="review-slide" data-review-slide>
+          <div class="review-stars" data-review-stars aria-hidden="true"></div>
+          <blockquote data-review-quote></blockquote>
+        </figure>
+        <button type="button" class="review-nav" data-review-next aria-label="Next review">
+          ›
+        </button>
+      </div>
+      <p class="review-status" data-review-status aria-live="polite"></p>
+    </section>
   </div>
 </Base>
+
+<script>
+  type Review = {
+    stars: number;
+    name: string;
+    text: string;
+    source: string;
+  };
+
+  const root = document.querySelector<HTMLElement>('.review-carousel');
+  if (root) {
+    const all: Review[] = JSON.parse(root.dataset.reviews || '[]');
+    const switchBtn = root.querySelector<HTMLButtonElement>('[data-review-switch]');
+    const uglyBox = root.querySelector<HTMLInputElement>('[data-review-ugly]');
+    const quoteEl = root.querySelector<HTMLElement>('[data-review-quote]');
+    const starsEl = root.querySelector<HTMLElement>('[data-review-stars]');
+    const statusEl = root.querySelector<HTMLElement>('[data-review-status]');
+    const prevBtn = root.querySelector<HTMLButtonElement>('[data-review-prev]');
+    const nextBtn = root.querySelector<HTMLButtonElement>('[data-review-next]');
+    const goodLabel = root.querySelector<HTMLElement>('[data-side="good"]');
+    const badLabel = root.querySelector<HTMLElement>('[data-side="bad"]');
+
+    let tone: 'good' | 'bad' = 'good';
+    let ugly = false;
+    let index = 0;
+
+    function pool(): Review[] {
+      if (ugly) return all.filter((r) => r.stars === 1);
+      if (tone === 'bad') return all.filter((r) => r.stars === 2);
+      return all.filter((r) => r.stars >= 4);
+    }
+
+    function starsMarkup(n: number) {
+      return Array.from({ length: 5 }, (_, i) => (i < n ? '★' : '☆')).join('');
+    }
+
+    function render() {
+      const items = pool();
+      if (!items.length) {
+        if (quoteEl) quoteEl.textContent = 'No reviews in this pile yet.';
+        if (starsEl) starsEl.textContent = '';
+        if (statusEl) statusEl.textContent = '';
+        if (prevBtn) prevBtn.disabled = true;
+        if (nextBtn) nextBtn.disabled = true;
+        return;
+      }
+
+      index = ((index % items.length) + items.length) % items.length;
+      const review = items[index];
+      if (starsEl) {
+        starsEl.textContent = starsMarkup(review.stars);
+        starsEl.setAttribute('aria-label', `${review.stars} out of 5 stars`);
+      }
+      if (quoteEl) quoteEl.textContent = `“${review.text}”`;
+      if (statusEl) statusEl.textContent = `${index + 1} / ${items.length}`;
+      if (prevBtn) prevBtn.disabled = items.length < 2;
+      if (nextBtn) nextBtn.disabled = items.length < 2;
+    }
+
+    function syncControls() {
+      const badOn = tone === 'bad';
+      if (switchBtn) {
+        switchBtn.setAttribute('aria-checked', badOn ? 'true' : 'false');
+        switchBtn.setAttribute('aria-label', badOn ? 'Show good reviews' : 'Show bad reviews');
+        switchBtn.disabled = ugly;
+        switchBtn.classList.toggle('is-on', badOn);
+      }
+      if (uglyBox) uglyBox.checked = ugly;
+      goodLabel?.classList.toggle('is-active', !ugly && tone === 'good');
+      badLabel?.classList.toggle('is-active', !ugly && tone === 'bad');
+      root.classList.toggle('is-ugly', ugly);
+      root.classList.toggle('is-bad', !ugly && tone === 'bad');
+      render();
+    }
+
+    switchBtn?.addEventListener('click', () => {
+      if (ugly) return;
+      tone = tone === 'good' ? 'bad' : 'good';
+      index = 0;
+      syncControls();
+    });
+
+    uglyBox?.addEventListener('change', () => {
+      ugly = uglyBox.checked;
+      index = 0;
+      syncControls();
+    });
+
+    prevBtn?.addEventListener('click', () => {
+      index -= 1;
+      render();
+    });
+
+    nextBtn?.addEventListener('click', () => {
+      index += 1;
+      render();
+    });
+
+    syncControls();
+  }
+</script>

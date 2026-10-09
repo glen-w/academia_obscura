@@ -1,6 +1,9 @@
 ---
 import Base from '../layouts/Base.astro';
 import bookHero from '../assets/book-hero.png';
+import guardianLogo from '../assets/press/the-guardian.svg';
+import theLogo from '../assets/press/times-higher-education.svg';
+import chronicleLogo from '../assets/press/the-chronicle.png';
 ---
 
 <Base
@@ -22,19 +25,42 @@ import bookHero from '../assets/book-hero.png';
   </section>
 
   <div class="wrap">
-    <h2>As seen in</h2>
+    <h2 class="press-heading">As seen in</h2>
     <ul class="press">
       <li>
-        <a href="https://www.theguardian.com/global/series/grooves-of-academe">The Guardian</a>
+        <a href="https://www.theguardian.com/global/series/grooves-of-academe">
+          <img
+            src={guardianLogo.src}
+            width="140"
+            height="46"
+            alt="The Guardian"
+            loading="lazy"
+          />
+        </a>
       </li>
       <li>
-        <a href="https://www.timeshighereducation.com/author/glen-wright">Times Higher Education</a>
+        <a href="https://www.timeshighereducation.com/author/glen-wright">
+          <img
+            src={theLogo.src}
+            width="120"
+            height="48"
+            alt="Times Higher Education"
+            loading="lazy"
+          />
+        </a>
       </li>
       <li>
         <a
           href="https://www.chronicle.com/blogs/wiredcampus/meet-the-26-year-old-behind-academic-twitters-most-popular-hashtags"
-          >The Chronicle</a
         >
+          <img
+            src={chronicleLogo.src}
+            width={chronicleLogo.width}
+            height={chronicleLogo.height}
+            alt="The Chronicle of Higher Education"
+            loading="lazy"
+          />
+        </a>
       </li>
     </ul>
   </div>
