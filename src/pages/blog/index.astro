@@ -1,12 +1,20 @@
 ---
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
+import { bestThumbnailFromMarkdown } from '../../lib/blogThumbnail';
 
-const posts = (await getCollection('blog'))
+const published = (await getCollection('blog'))
   .filter((p) => p.data.draft !== true)
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
-function hrefFor(post: (typeof posts)[number]) {
+const posts = await Promise.all(
+  published.map(async (post) => ({
+    post,
+    thumbnail: await bestThumbnailFromMarkdown(post.body),
+  })),
+);
+
+function hrefFor(post: (typeof posts)[number]['post']) {
   return `/blog/${post.id}/`;
 }
 
@@ -34,10 +42,27 @@ function formatDate(d: Date) {
         <p class="quiet">Nothing posted yet.</p>
       ) : (
         <ol class="post-list">
-          {posts.map((post) => (
+          {posts.map(({ post, thumbnail }) => (
             <li>
-              <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
-              <a href={hrefFor(post)}>{post.data.title}</a>
+              <a class="post-list-item" href={hrefFor(post)}>
+                {thumbnail ? (
+                  <img
+                    class="post-list-thumb"
+                    src={thumbnail}
+                    alt=""
+                    width="72"
+                    height="72"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                ) : (
+                  <span class="post-list-thumb post-list-thumb--placeholder" aria-hidden="true" />
+                )}
+                <span class="post-list-copy">
+                  <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
+                  <span class="post-list-title">{post.data.title}</span>
+                </span>
+              </a>
             </li>
           ))}
         </ol>

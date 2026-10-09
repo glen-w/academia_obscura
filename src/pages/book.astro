@@ -2,7 +2,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import Base from '../layouts/Base.astro';
-import cover from '../assets/book-cover.jpg';
+import bookHero from '../assets/book-hero.png';
 import { parseCsv } from '../lib/parseCsv';
 
 type Review = {
@@ -49,43 +49,50 @@ const reviewsJson = JSON.stringify(reviews);
   description="Academia Obscura: The Hidden Silly Side of Higher Education, published with Unbound."
   path="/book/"
 >
-  <div class="wrap">
-    <h1>The Book</h1>
-    <div class="book-split">
+  <section class="hero hero-home">
+    <h1 class="hero-home-title">The Book</h1>
+    <div class="hero-book">
       <img
-        class="book-cover"
-        src={cover.src}
-        width={cover.width}
-        height={cover.height}
-        alt="Cover of Academia Obscura: The Hidden Silly Side of Higher Education"
+        src={bookHero.src}
+        width={bookHero.width}
+        height={bookHero.height}
+        alt="Academia Obscura: The Hidden Silly Side of Higher Education"
+        fetchpriority="high"
       />
-      <div>
-        <p>
-          <em>Academia Obscura: The Hidden Silly Side of Higher Education</em> collects the stranger
-          corners of scholarly life — baffling studies, accidental humour, and rituals that only make
-          sense from inside a university.
-        </p>
-        <p>
-          It was crowdfunded with Unbound by oddball academics around the world, and published in
-          late 2017. “Write a book,” they said. “It’ll be fun,” they said. It mostly was.
-        </p>
-        <div class="ctas book-ctas">
-          <a
-            class="btn primary has-icon"
-            href="https://www.amazon.com/Academia-Obscura-Hidden-Higher-Education/dp/1783523417"
-          >
-            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-              <circle cx="9" cy="21" r="1" />
-              <circle cx="20" cy="21" r="1" />
-              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-            </svg>
-            Buy the book
-          </a>
-          <a class="btn ghost" href="/book/download/">Download it for free!</a>
-        </div>
-      </div>
     </div>
+    <div class="hero-blurb lede">
+      <p>
+        If you think the groves of academe are all stuffiness, elbow patches and greying old men...
+        think again.
+      </p>
+      <p>
+        Academia Obscura is an irreverent glimpse inside the ivory tower, exposing the eccentric
+        and slightly unhinged world of university life. Take a trip through the spectrum of academic
+        oddities and unearth the Easter eggs buried in peer reviewed papers, the weird and wonderful
+        world of scholarly social media, and rats in underpants.
+      </p>
+      <p>
+        The book was crowdfunded by hundreds of oddball academics and published by Unbound (🪦) /
+        Penguin Random House (🐧🏠).
+      </p>
+    </div>
+    <div class="ctas book-ctas">
+      <a
+        class="btn primary has-icon"
+        href="https://www.amazon.com/Academia-Obscura-Hidden-Higher-Education/dp/1783523417"
+      >
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="9" cy="21" r="1" />
+          <circle cx="20" cy="21" r="1" />
+          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+        </svg>
+        Buy the book
+      </a>
+      <a class="btn ghost" href="/book/download/">Download it for free!</a>
+    </div>
+  </section>
 
+  <div class="wrap">
     <section class="review-carousel" aria-label="Reader reviews" data-reviews={reviewsJson}>
       <h2 class="review-heading">Praise (and disdain) for the Academia Obscura book</h2>
       <div class="review-controls">

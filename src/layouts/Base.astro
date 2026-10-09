@@ -6,6 +6,9 @@ import '@fontsource/source-serif-4/400-italic.css';
 import '@fontsource/source-sans-3/400.css';
 import '@fontsource/source-sans-3/600.css';
 import crest from '../assets/crest.png';
+import guardianLogo from '../assets/press/the-guardian.svg';
+import theLogo from '../assets/press/times-higher-education.svg';
+import chronicleLogo from '../assets/press/the-chronicle.png';
 
 interface Props {
   title?: string;
@@ -31,7 +34,6 @@ const glenwrightId = '591578b7-7945-4429-88b4-c1ea8bf39f9e';
 const umamiOk = Boolean(umamiId && umamiId !== glenwrightId);
 
 const nav = [
-  { href: '/', label: 'Home' },
   { href: '/book/', label: 'Book' },
   { href: '/lectures/', label: 'Lectures' },
   { href: '/blog/', label: 'Blog' },
@@ -67,7 +69,7 @@ function current(href: string) {
     <a class="skip" href="#main">Skip to content</a>
     <header class="chrome">
       <div class="chrome-inner">
-        <a class="wordmark" href="/">
+        <a class="wordmark" href="/book/">
           <img src={crest.src} width="44" height="44" alt="" />
           <span class="wordmark-text">
             <span class="wordmark-title">Academia Obscura</span>
@@ -94,12 +96,54 @@ function current(href: string) {
     </main>
     <footer class="site">
       <div class="foot-inner">
-        <p>
-          <a href="/contact/">Contact</a>
-          ·
-          <a href="https://glenwright.earth/">Glen Wright</a>
-        </p>
-        <p>academiaobscura.com · since 2014</p>
+        <div class="foot-press">
+          <p class="press-heading">As seen in</p>
+          <ul class="press">
+            <li>
+              <a href="https://www.theguardian.com/global/series/grooves-of-academe">
+                <img
+                  src={guardianLogo.src}
+                  width="140"
+                  height="46"
+                  alt="The Guardian"
+                  loading="lazy"
+                />
+              </a>
+            </li>
+            <li>
+              <a href="https://www.timeshighereducation.com/author/glen-wright">
+                <img
+                  src={theLogo.src}
+                  width="120"
+                  height="48"
+                  alt="Times Higher Education"
+                  loading="lazy"
+                />
+              </a>
+            </li>
+            <li>
+              <a
+                href="https://www.chronicle.com/blogs/wiredcampus/meet-the-26-year-old-behind-academic-twitters-most-popular-hashtags"
+              >
+                <img
+                  src={chronicleLogo.src}
+                  width={chronicleLogo.width}
+                  height={chronicleLogo.height}
+                  alt="The Chronicle of Higher Education"
+                  loading="lazy"
+                />
+              </a>
+            </li>
+          </ul>
+        </div>
+        <div class="foot-meta">
+          <p>
+            <a href="/contact/">Contact</a>
+            ·
+            <a href="https://glenwright.earth/">Glen Wright</a>
+          </p>
+          <p>academiaobscura.com · since 2014</p>
+        </div>
       </div>
     </footer>
   </body>
