@@ -6,7 +6,7 @@
   --ao-chrome: #111111;
   --ao-paper: #fafaf8;
   --ao-rule: #e4dfd6;
-  --ao-max: 42rem;
+  --ao-max: 46rem;
   --ao-wide: 56rem;
 }
 
@@ -168,11 +168,11 @@ nav a:hover {
 }
 
 .hero {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0;
 }
 
 .hero-home {
-  padding: 2.5rem 1.25rem 1rem;
+  padding: 2.5rem 1.25rem 0;
   text-align: center;
 }
 
@@ -221,8 +221,16 @@ nav a:hover {
 
 .lede {
   margin: 0 auto 1.5rem;
-  max-width: 38rem;
+  max-width: var(--ao-max);
   color: var(--ao-ink);
+}
+
+.wrap.wrap--flush-top {
+  padding-top: 0;
+}
+
+.hero-home .hero-blurb.lede {
+  margin-bottom: 0;
 }
 
 .ctas {
@@ -387,9 +395,14 @@ h1 {
 }
 
 .review-carousel {
-  margin-top: 2.25rem;
-  padding-top: 1.75rem;
+  margin-top: 1rem;
+  padding-top: 1.25rem;
   border-top: 1px solid var(--ao-rule);
+}
+
+.wrap.wrap--flush-top > .review-carousel {
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
 }
 
 .review-heading {
